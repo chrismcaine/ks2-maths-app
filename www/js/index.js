@@ -50,23 +50,14 @@ var app = {
         var Game = function () { }; 
         Game.Model = {};
         var Question = function() { };
-        Question.Model = {
-            //Orientation: true,
-            //Type: true,
-            //Value1: true,
-            //Value2: true,
-            //Attempts: null,
-            //DateCreated : null
-        };
+        Question.Model = {};
 //        this.database.Games = new DbSet('games', 'Id', Game, this.database);
         this.Questions = new DbSet('questions', 'Id', Question, this.db);
-        this.db.Init().subscribe(this.runProgramme.bind(this));
+        this.db.Init().subscribe(() => new Play(this));
         
         // testing on browser
         var _this = this;
-      //  setTimeout(function () {
-        //    _this.onDeviceReady();
-        //}, 1000);
+        setTimeout(() => this.onDeviceReady(), 1000);
     },
 
     // deviceready Event Handler
@@ -89,10 +80,6 @@ var app = {
         receivedElement.setAttribute('style', 'display:block;');
 
         console.log('Received Event: ' + id);
-    },
-    runProgramme: function () {
-      this.play = new Play(this);
-      this.review = new Review(this);
     }
 };
 

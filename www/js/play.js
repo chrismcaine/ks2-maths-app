@@ -32,86 +32,157 @@ function registerButtons() {
     return Rx.Observable.merge(streams).map(e => { return { event: e.target.getAttribute('data-event-name'), value: e.target.getAttribute('data-value') } }).share();
 }
 
+var addItemToResultsList = function (item) {
+    var el = document.querySelector('.answers');
+    var template = document.getElementById('template-answer-list').innerHTML;
+    var obj = {};
+    obj.Sum = item.Sum;
+    obj.DateCreated = Helpers.FormatDate(item.DateCreated, 'h:mmp | <em>dS MMM yyyy</em>', true);
+    el.innerHTML = Helpers.Bind(template, obj) + el.innerHTML;
+}
+
+var bindTo = function (property, addClass) {
+    var _p = document.querySelector('.' + property);
+    return function (val) {
+        if (addClass === true) {
+            _p.setAttribute('class', property + ' ' + val);
+        } else {
+            if (_p) _p.innerText = val;
+        }
+        return val;
+    };
+}
+
+function Question(obj) {
+
+    this.Id = Helpers.Guid.NewGuid();
+    this.Orientation = obj.orientation;
+    this.Type = obj.type;
+    this.Value1 = obj.num1;
+    this.Value2 = obj.num2;
+    this.Attempts = 0;
+    this.DateCreated = null;
+    this.Count = obj.count;
+
+    switch (obj.orientation) {
+        case 0:
+            this.Format = '{Value1} {Type} {Value2} = {Answer}';
+            break;
+        case 1:
+            this.Format = '{Answer} {Type} {Value1} = {Value2}';
+            break;
+        case 2:
+            this.Format = '{Value1} {Type} {Answer} = {Value2}';
+            break;
+        default:
+            break;
+    }
+
+    switch (obj.type) {
+        case '+':
+            if (obj.orientation === 1 || obj.orientation === 2) {
+                this.Value2 = obj.num1 + obj.num2;
+            }
+            break;
+        case '-':
+            if (obj.orientation === 0 || obj.orientation === 2) {
+                this.Value1 = obj.num1 + obj.num2;
+            }
+            break;
+        case 'x':
+            if (obj.orientation === 1 || obj.orientation === 2) {
+                this.Value2 = obj.num1 * obj.num2;
+            }
+            break;
+        case '/':
+            if (obj.orientation === 0 || obj.orientation === 2) {
+                this.Value1 = obj.num1 * obj.num2;
+            }
+            break;
+    }
+
+    return this;
+}
+
+function shuffle(array) {
+    var currentIndex = array.length, temporaryValue, randomIndex;
+
+    // While there remain elements to shuffle...
+    while (0 !== currentIndex) {
+
+        // Pick a remaining element...
+        randomIndex = Math.floor(Math.random() * currentIndex);
+        currentIndex -= 1;
+
+        // And swap it with the current element.
+        temporaryValue = array[currentIndex];
+        array[currentIndex] = array[randomIndex];
+        array[randomIndex] = temporaryValue;
+    }
+
+    return array;
+}
+
+function createNofType(type, n) {
+    var arr = [];
+    for (var i = 0; i < n; i += 1) {
+        arr.push(type !== null ? type : ['+', '-', 'x', '/'][Math.floor(Math.random() * 4)]);
+    }
+    return arr;
+}
+function createNofOrientation(o, n) {
+    var arr = [];
+    for (var i = 0; i < n; i += 1) {
+        arr.push(o !== null ? o : Math.floor(Math.random() * 3));
+    }
+    return arr;
+}
+function createValuesTo(n) {
+    var arr = [];
+    while (n > 0) {
+        arr.push(n);
+        n--;
+    }
+    return arr;
+}
 
 var Play = function (app) {
-    
+    var _app = app;
+
     drawKeyPad();
+
     var clicks$ = registerButtons();
 
-    var _app = app;
-    var bindTo = function (property, addClass) {
-        var _p = document.querySelector('.' + property);
-        return function (val) {
-            if (addClass === true) {
-                _p.setAttribute('class', property + ' ' + val); 
-            } else {
-                if (_p) _p.innerText = val;
-            }
-            return val;
-        };
-    }
+  
 
     var next$ = new Rx.Subject();
 
-    var const$ = Rx.Observable.fromArray([10, 10, 2, 5, 8, 6, 7, 1, 11, 3, 8, 12].reverse())//.just(parseInt($state.params.value));
-    var type$ = Rx.Observable.just('-');
-    var variables$ = Rx.Observable.fromArray([4, 10, 2, 5, 8, 6, 7, 1, 11, 3, 8, 12]);
 
-    var questions$ = Rx.Observable.zip(next$, variables$, const$)
-        .withLatestFrom(type$)
-        .map(arr => [arr[0][1], arr[0][2], arr[1]])
-        .map(arr => { return { num1: arr[0], num2: arr[1], type: ['+', '-', 'x', '/'][Math.floor(Math.random() * 4)] /*arr[2]*/, orientation: Math.floor(Math.random() * 3) } })
-        .map(function (obj) {
-            var q = {
-                Id : Helpers.Guid.NewGuid(),
-                Orientation: obj.orientation,
-                Type: obj.type,
-                Value1: obj.num1,
-                Value2: obj.num2,
-                Attempts: 0,
-                DateCreated : null
-            };
+    var const$ = Rx.Observable.fromArray(shuffle(createValuesTo(12)));
+    var type$ = Rx.Observable.fromArray(createNofType('-', 12));  //
+    var variables$ = Rx.Observable.fromArray(shuffle(createValuesTo(12)));
 
-            switch (obj.orientation) {
-                case 0:
-                    q.Format = '{Value1} {Type} {Value2} = {Answer}';
-                    break;
-                case 1:
-                    q.Format = '{Answer} {Type} {Value1} = {Value2}';
-                    break;
-                case 2:
-                    q.Format = '{Value1} {Type} {Answer} = {Value2}';
-                    break;
-                default:
-                    break;
-            }
+    var orientation$ = Rx.Observable.fromArray(createNofOrientation(0, 12));// Math.floor(Math.random() * 3)
+    var count$ = Rx.Observable.fromArray(createValuesTo(2));
 
-            switch (obj.type) {
-                case '+':
-                    if (obj.orientation === 1 || obj.orientation === 2) {
-                        q.Value2 = obj.num1 + obj.num2;
-                    }
-                    break;
-                case '-':
-                    if (obj.orientation === 0 || obj.orientation === 2) {
-                        q.Value1 = obj.num1 + obj.num2;
-                    }
-                    break;
-                case 'x':
-                    if (obj.orientation === 1 || obj.orientation === 2) {
-                        q.Value2 = obj.num1 * obj.num2;
-                    }
-                    break;
-                case '/':
-                    if (obj.orientation === 0 || obj.orientation === 2) {
-                        q.Value1 = obj.num1 * obj.num2;
-                    }
-                    break;
-            }
+    var Game = function (Next$) {
+        this.Questions = Rx.Observable.zip(Next$, variables$, const$, type$, orientation$, count$)
+            .map(arr => { return { num1: arr[1], num2: arr[2], type: arr[3], orientation: arr[4], count: arr[5] } })
+            .map(x => new Question(x))
+            .do(x => console.log(x))
+            .share();
+        return this;
+    }
 
-            return q;
-        })
-        .share();
+
+
+    var questions$ = new Rx.Subject();
+
+
+    var game = new Game(next$);
+    game.Questions.subscribe(q => questions$.onNext(q));
+
+
 
     questions$.do(bindTo('sum')).subscribe(x => { });
 
@@ -142,24 +213,30 @@ var Play = function (app) {
         return val;
     });
 
+    // load previous results from db
+    Rx.Observable.just(null).withLatestFrom(app.Questions).map(app.DbFactory.Query).switch().subscribe(x => {
+        x.orderBy('DateCreated', true).reverse()
+            .forEach(addItemToResultsList);
+    });
+
     var results$ = isCorrect$.filter(x => x.Result === true)
         .withLatestFrom(result$)
         .map(arr => { arr[1].DateCreated = new Date(); return arr[1]; })
-        .withLatestFrom(app.Questions).map(app.DbFactory.Add).switch().subscribe(x => { app.review.AddItem(x);  });
+        .withLatestFrom(app.Questions).map(app.DbFactory.Add).switch().subscribe(addItemToResultsList);
 
-    var new$ = isCorrect$.filter(x => x.Result === true).delay(1600);
+    var new$ = isCorrect$.filter(x => x.Result === true).delay(800);
 
     new$.map(null).do(bindTo('correct', true)).subscribe(() => next$.onNext());
 
     isCorrect$.map(x => x.Result).do(bindTo('correct', true)).subscribe(x => { });
 
-    var clear$ = clearClick$.merge(isCorrect$.filter(x => x.Result === false).delay(1000)).map(null).share();
+    var clear$ = clearClick$.merge(isCorrect$.filter(x => x.Result === false).delay(500)).map(null).share();
 
     clear$.do(bindTo('correct', true)).subscribe(x => { forceClear$.onNext(); });
 
     answer$.subscribe(str => { });
 
-  //  results$.do(bindTo('list')).subscribe(x => { });
+    //  results$.do(bindTo('list')).subscribe(x => { });
 
     next$.onNext(null);
 }
