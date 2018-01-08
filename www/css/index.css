@@ -1,0 +1,234 @@
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+* {
+    -webkit-tap-highlight-color: rgba(0,0,0,0); /* make transparent link selection, adjust last value opacity 0 to 1.0 */
+}
+
+body {
+    -webkit-touch-callout: none; /* prevent callout to copy image, etc when tap to hold */
+    -webkit-text-size-adjust: none; /* prevent webkit from resizing text to fit */
+    -webkit-user-select: none; /* prevent copy paste, to allow, change 'none' to 'text' */
+    background-color: #E4E4E4;
+    background-attachment: fixed;
+    font-family: 'HelveticaNeue-Light', 'HelveticaNeue', Helvetica, Arial, sans-serif;
+    font-size: 12px;
+    height: 100%;
+    margin: 0px;
+    padding: 0px;
+    text-transform: uppercase;
+    width: 100%;
+}
+
+body {
+    overflow: hidden;
+    position: relative;
+    margin: 0;
+    width: 100vw;
+}
+
+.menu {
+    height: 60px;
+    background: #63085d;
+    color: #fff;
+}
+
+    .menu ul {
+        display: block;
+        font-size: 0;
+        margin: 0;
+        padding: 0;
+        align-items: stretch;
+    }
+
+    .menu li {
+        display: inline-block;
+        justify-content: center;
+        align-content: center;
+        align-items: center;
+        width: 33.33333vw;
+        height: 60px;
+        box-sizing: border-box;
+    }
+
+    .menu a {
+        display: block;
+        text-align: center;
+        line-height: 60px;
+        vertical-align: middle;
+        color: #fff;
+        font-size: 18px;
+        opacity: 1;
+    }
+
+.splash .menu a {
+    opacity: 0;
+}
+
+[class^="area-"] {
+    display: inline-block;
+    width: 100vw;
+    height: calc(100vh - 60px);
+    overflow: hidden;
+}
+
+.wrapper {
+    width: 500vw;
+    transition: all .3s ease;
+    margin-left: 0;
+}
+
+.splash .wrapper {
+    margin-left: 0vw;
+}
+
+.dashboard .wrapper {
+    margin-left: calc(-100vw + -7px);
+}
+
+.play .wrapper {
+    margin-left: -200vw;
+    margin-left: calc(-200vw + -7px);
+}
+
+.settings .wrapper {
+    margin-left: calc(-300vw + -7px);
+}
+
+
+
+
+/* Portrait layout (default) */
+.area-splash {
+    background: url(../img/logo.png) no-repeat center top; /* 170px x 200px */
+    text-align: center;
+    /* offset horizontal: half of text area width */
+}
+
+/* Landscape layout (with min-width) */
+@media screen and (min-aspect-ratio: 1/1) and (min-width:400px) {
+    .area-splash {
+        background-position: left center;
+        /* offset horizontal: half of image width and text area width */
+    }
+}
+
+.area-splash {
+}
+
+.area-play {
+    background: #dd2222;
+}
+
+/* Empty. Add your own CSS if you like */
+.display {
+    margin: auto;
+    position: relative;
+    display: block;
+    width: 318px;
+    height: auto;
+    font-size: 0;
+    padding: 10px;
+}
+
+    .display > div {
+        background: #222;
+        border: solid 1px #e5e5e5;
+        box-shadow: 2px 2px 5px rgba(0,0,0,0.1);
+        border-radius: 5px;
+        padding: 10px 20px;
+    }
+
+    .display span {
+        position: relative;
+        font-size: 1.4rem;
+        color: #22dd22;
+        width: 100%;
+        height: 100%;
+    }
+
+    .display .ion-close {
+        color: #dd2222;
+    }
+
+
+.correct {
+    position: absolute;
+    right: 25px;
+    top: 22px;
+}
+
+    .correct .true, .correct .false {
+        display: none;
+    }
+
+        .correct.true .true {
+            display: inline;
+        }
+
+        .correct.false .false {
+            color: #dd2222;
+        }
+
+        .correct.false .false {
+            display: inline;
+        }
+
+
+.keypad {
+    margin: auto;
+    position: relative;
+    display: block;
+    width: 320px;
+    height: 400px;
+    font-size: 0;
+}
+
+    .keypad span {
+        display: inline-block;
+        position: relative;
+        width: 33%;
+        height: 25%;
+        padding: 10px;
+    }
+
+    .keypad button {
+        position: relative;
+        font-size: 1.4rem;
+        border: solid 1px #e5e5e5;
+        background: #ff41f2;
+        color: #fff;
+        width: 100%;
+        height: 100%;
+        border-radius: 5px;
+        box-shadow: 2px 2px 5px rgba(0,0,0,0.1);
+    }
+
+ul.answers {
+    margin: 5px;
+}
+
+    ul.answers li {
+        display: block;
+        padding: 5px 15px;
+        margin-bottom: 3px;
+        border: solid 1px #e5e5e5;
+        border-radius: 3px;
+        font-size: 1.1rem;
+        text-transform: none;
+    }
