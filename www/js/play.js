@@ -137,13 +137,54 @@ function createNofOrientation(o, n) {
     }
     return arr;
 }
-function createValuesTo(n) {
-    var arr = [];
-    while (n > 0) {
-        arr.push(n);
-        n--;
+function createValuesTo(n, count) {
+    var valueSet = [];
+    var min = n[0];
+    var max = n[1];
+    var range = max - min;
+    
+    for (var i = min; i <= max; i += 1) {
+        valueSet.push(i);
     }
+
+    shuffle(valueSet);
+    var length = valueSet.length;
+    var arr = [];
+    for (var i = 0; i < count; i += 1) {
+        arr.push(valueSet[i%length]);
+    }
+    
     return arr;
+}
+
+function getCountDown(max) {
+    var arr = [];
+    while (max > 0) {
+        arr.push(max);
+        max--;
+    }
+    console.log(arr);
+    return arr;
+}
+
+var Game = function (settings, Next$) {
+    var const$ = Rx.Observable.fromArray(shuffle(createValuesTo(settings.value1, settings.count)));
+    var type$ = Rx.Observable.fromArray(createNofType(settings.type, settings.count));  //
+    var variables$ = Rx.Observable.fromArray(shuffle(createValuesTo(settings.value1, settings.count)));
+    var orientation$ = Rx.Observable.fromArray(createNofOrientation(0, settings.count));// Math.floor(Math.random() * 3)
+    var count$ = Rx.Observable.fromArray(getCountDown(settings.count));//.scan(function (agg, val) { }, settings.count);
+
+//    count$.subscribe(x => console.log(x));
+
+    this.Questions$ = Rx.Observable.zip(Next$, variables$, const$, type$, orientation$, count$)
+        .map(arr => { return { num1: arr[1], num2: arr[2], type: arr[3], orientation: arr[4], count: arr[5] } })
+        .map(x => new Question(x))
+        .do(x => console.log(x))
+        .share();
+
+    this.Ends$ = this.Questions$.map(q => q.Count).filter(x => x === 1); 
+
+    return this;
 }
 
 var Play = function (app) {
@@ -153,36 +194,17 @@ var Play = function (app) {
 
     var clicks$ = registerButtons();
 
-  
-
     var next$ = new Rx.Subject();
-
-
-    var const$ = Rx.Observable.fromArray(shuffle(createValuesTo(12)));
-    var type$ = Rx.Observable.fromArray(createNofType('-', 12));  //
-    var variables$ = Rx.Observable.fromArray(shuffle(createValuesTo(12)));
-
-    var orientation$ = Rx.Observable.fromArray(createNofOrientation(0, 12));// Math.floor(Math.random() * 3)
-    var count$ = Rx.Observable.fromArray(createValuesTo(2));
-
-    var Game = function (Next$) {
-        this.Questions = Rx.Observable.zip(Next$, variables$, const$, type$, orientation$, count$)
-            .map(arr => { return { num1: arr[1], num2: arr[2], type: arr[3], orientation: arr[4], count: arr[5] } })
-            .map(x => new Question(x))
-            .do(x => console.log(x))
-            .share();
-        return this;
-    }
-
-
 
     var questions$ = new Rx.Subject();
 
+    this.RunGame = function (settings) {
+        var game = new Game(settings, next$);
+        game.Questions$.subscribe(q => questions$.onNext(q));
+        next$.onNext();
+    }
 
-    var game = new Game(next$);
-    game.Questions.subscribe(q => questions$.onNext(q));
-
-
+    this.RunGame({ value1: [1, 12], value2: [2, 2], count: 12, type: 'x', });
 
     questions$.do(bindTo('sum')).subscribe(x => { });
 

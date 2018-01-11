@@ -53,7 +53,7 @@ var app = {
         Question.Model = {};
 //        this.database.Games = new DbSet('games', 'Id', Game, this.database);
         this.Questions = new DbSet('questions', 'Id', Question, this.db);
-        this.db.Init().subscribe(() => new Play(this));
+        this.db.Init().subscribe(() => this.play = new Play(this));
         
         // testing on browser
         var _this = this;

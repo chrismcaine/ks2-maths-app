@@ -83,8 +83,6 @@ body {
 
 [class^="area-"] {
     position: absolute;
-  //  top: 0;
-  //  left: 0;
     height: calc(100vh - 60px);
     width: 100vw;
     overflow: hidden;
